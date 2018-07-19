@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/coreos/go-systemd/sdjournal"
 )
@@ -79,6 +80,10 @@ func run(configFilename string) error {
 		return fmt.Errorf("error initializing writer: %s", err)
 	}
 
+	// start 14 days ago (CloudWatch limit)
+	now := time.Now()
+	journal.SeekRealtimeUsec(uint64((now.UnixNano() / 1e3) - 1209600000000))
+	
 	seeked, err := journal.Next()
 	if seeked == 0 || err != nil {
 		return fmt.Errorf("unable to seek to first item in journal")
